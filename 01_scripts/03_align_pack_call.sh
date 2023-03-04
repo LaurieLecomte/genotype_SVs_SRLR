@@ -14,7 +14,7 @@ GENOME="03_genome/genome.fasta"
 FASTQ_DIR="04_reads"
 
 VCF_DIR="05_candidates"
-INPUT_VCF="$VCF_DIR/raw/merged_SUPP2.vcf"
+INPUT_VCF="$VCF_DIR/raw/merged_SUPP2.ready.vcf"
 
 GRAPH_DIR="06_graph"
 INDEX_DIR="$GRAPH_DIR/index"
@@ -29,7 +29,7 @@ FILT_DIR="09_filtered"
 CPU=10
 MEM="100G"
 
-CANDIDATES_VCF="$VCF_DIR/candidates/"$(basename -s .vcf $INPUT_VCF)".candidates.vcf.gz"
+CANDIDATES_VCF="$VCF_DIR/candidates/"$(basename -s .ready.vcf $INPUT_VCF)".candidates.vcf.gz"
 
 TMP_DIR="tmp"
 
