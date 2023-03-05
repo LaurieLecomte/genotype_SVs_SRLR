@@ -6,7 +6,7 @@
 # parallel -a 02_infos/ind_ALL.txt -j 4 srun -c 20 -p medium --time=7-00:00:00 --mem=100G -J 03_align_pack_call_{} -o log/03_align_pack_call_{}_%j.log /bin/sh ./01_scripts/03_align_pack_call.sh {} &
 
 # valeria
-# parallel -a 02_infos/ind_ALL.txt -j 4 srun -c 20 -p ibis_medium --time=7-00:00:00 --mem=100G -J 03_align_pack_call_{} -o log/03_align_pack_call_{}_%j.log /bin/sh ./01_scripts/03_align_pack_call.sh {} &
+# parallel -a 02_infos/ind_ALL.txt -j 3 srun -c 25 -p ibis_medium --time=7-00:00:00 --mem=100G -J 03_align_pack_call_{} -o log/03_align_pack_call_{}_%j.log /bin/sh ./01_scripts/03_align_pack_call.sh {} &
 
 
 # VARIABLES
@@ -26,7 +26,7 @@ CALLS_DIR="07_calls"
 MERGED_DIR="08_MERGED"
 FILT_DIR="09_filtered"
 
-CPU=50
+CPU=25
 MEM="100G"
 
 CANDIDATES_VCF="$VCF_DIR/candidates/"$(basename -s .ready.vcf $INPUT_VCF)".candidates.vcf.gz"
