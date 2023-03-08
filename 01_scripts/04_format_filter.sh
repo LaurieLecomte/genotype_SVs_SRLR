@@ -35,14 +35,26 @@ TMP_DIR="tmp"
 
 SAMPLE=$1
 
+REGIONS_EX="02_infos/excl_chrs.txt"
+
+MIN_GQ=5
+MAX_GQ=256 # deduct max allowed GQ from VCF, e.g. bcftools query -f "[%GQ\n]" $CALLS_DIR/raw/"$SAMPLE".vcf | sort -n | uniq | tail -n1
+
+MIN_DP=4
+MAX_DP=80 # arbitrary threshold of 5 * anticipated SR sequencing coverage, 5 * 16 
+
 # LOAD REQUIRED MODULES
 module load bcftools/1.13
 
-# 1. Rename sample in output VCF, since vg call -s $ID does not output sample name in output VCF
+# 1. Rename sample in output VCF, since vg call -s $ID does not output sample name in output VCF, and remove unwanted contigs from header
 echo -e "SAMPLE\t$SAMPLE" > 02_infos/"$SAMPLE".names
-bcftools reheader -s 02_infos/"$SAMPLE".names $CALLS_DIR/raw/"$SAMPLE".vcf > $CALLS_DIR/raw/"$SAMPLE".vcf
+bcftools reheader -s 02_infos/"$SAMPLE".names $CALLS_DIR/raw/"$SAMPLE".vcf | grep -vFf $REGIONS_EX > $CALLS_DIR/raw/"$SAMPLE".tmp
 rm 02_infos/"$SAMPLE".names
 
+# 2. Remove non biallelic sites, and assign missing genotype where DP and GQ are too low or too extreme
+#bcftools filter -i "FORMAT/GQ >= $MIN_GQ & FORMAT/DP >= $MIN_DP" $CALLS_DIR/raw/"$SAMPLE".tmp > $FILT_DIR/"$SAMPLE"_GQ"$MIN_GQ"_DP"$MIN_DP".vcf
+bcftools view -m2 -M2 $CALLS_DIR/raw/"$SAMPLE".tmp | bcftools +setGT -- -t q -n . -i "FORMAT/DP >= $MIN_DP & FORMAT/DP < $MAX_DP & FORMAT/GQ >= $MIN_GQ & FORMAT/GQ < $MAX_GQ" | bcftools sort > $CALLS_DIR/filtered/"$SAMPLE"_DP"$MIN_DP"_GQ"$MIN_GQ".vcf
+
 # 2. Compress 
-#bgzip $CALLS_DIR/"$SAMPLE".vcf
-#tabix $CALLS_DIR/"$SAMPLE".vcf.gz
+bgzip $CALLS_DIR/filtered/"$SAMPLE"_DP"$MIN_DP"_GQ"$MIN_GQ".vcf
+tabix $CALLS_DIR/filtered/"$SAMPLE"_DP"$MIN_DP"_GQ"$MIN_GQ".vcf.gz
