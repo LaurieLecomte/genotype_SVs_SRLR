@@ -53,7 +53,7 @@ rm 02_infos/"$SAMPLE".names
 
 # 2. Remove non biallelic sites, and assign missing genotype where DP and GQ are too low or too extreme
 #bcftools filter -i "FORMAT/GQ >= $MIN_GQ & FORMAT/DP >= $MIN_DP" $CALLS_DIR/raw/"$SAMPLE".tmp > $FILT_DIR/"$SAMPLE"_GQ"$MIN_GQ"_DP"$MIN_DP".vcf
-bcftools view -m2 -M2 $CALLS_DIR/raw/"$SAMPLE".tmp | bcftools +setGT -- -t q -n . -i "FORMAT/DP >= $MIN_DP & FORMAT/DP < $MAX_DP & FORMAT/GQ >= $MIN_GQ & FORMAT/GQ < $MAX_GQ" | bcftools sort > $CALLS_DIR/filtered/"$SAMPLE"_DP"$MIN_DP"_GQ"$MIN_GQ".vcf
+bcftools view -m2 -M2 $CALLS_DIR/raw/"$SAMPLE".tmp | bcftools +setGT -- -t q -n . -e "FORMAT/DP >= $MIN_DP & FORMAT/DP < $MAX_DP & FORMAT/GQ >= $MIN_GQ & FORMAT/GQ < $MAX_GQ" | bcftools sort > $CALLS_DIR/filtered/"$SAMPLE"_DP"$MIN_DP"_GQ"$MIN_GQ".vcf
 
 # 2. Compress 
 bgzip $CALLS_DIR/filtered/"$SAMPLE"_DP"$MIN_DP"_GQ"$MIN_GQ".vcf
