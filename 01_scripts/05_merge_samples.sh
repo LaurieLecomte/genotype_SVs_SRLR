@@ -22,7 +22,7 @@ SNARLS_DIR="$GRAPH_DIR/snarls"
 PACKS_DIR="$GRAPH_DIR/packs"
 
 CALLS_DIR="07_calls"
-MERGED_DIR="08_MERGED"
+MERGED_DIR="08_merged"
 FILT_DIR="09_filtered"
 
 CANDIDATES_VCF="$VCF_DIR/candidates/"$(basename -s .ready.vcf $INPUT_VCF)".candidates.vcf.gz"
@@ -45,4 +45,22 @@ module load bcftools/1.13
 ls -1 $CALLS_DIR/filtered/*_DP"$MIN_DP"_GQ"$MIN_GQ".vcf.gz > 02_infos/samples_VCF.txt
 
 # 2. Merge genotyped calls across samples
-bcftools merge 02_infos/samples_VCF.txt | bcftools sort > $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.vcf
+bcftools merge -l 02_infos/samples_VCF.txt | bcftools sort > $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.tmp
+
+# 3. Correct contig order in header
+bcftools view -h $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.tmp | grep -v ^'#CHROM' | grep -v contig > $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header.tmp
+
+bcftools view -h $CANDIDATES_VCF | grep -v ^'#CHROM' | grep contig > $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header.contigs
+
+cat $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header.tmp $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header.contigs > $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header
+
+less $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.tmp | grep -v ^'\#\#' > $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.contents
+
+## Cat new header and contents
+cat $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.contents | bcftools sort > $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.vcf
+
+# Clean up 
+rm $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header.tmp
+rm $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header.contigs
+rm $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header
+
