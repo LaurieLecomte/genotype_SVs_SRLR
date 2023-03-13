@@ -3,7 +3,7 @@
 # Merge genotyped SVs across samples to yield a single multisample VCF file
 
 # manitou
-# srun -c 1 -p small --time=1-00:00:00 -J --mem=10G 05_merge_samples -o log/05_merge_samples_%j.log /bin/sh ./01_scripts/05_merge_samples.sh &
+# srun -c 1 -p small --time=1-00:00:00 --mem=10G -J 05_merge_samples -o log/05_merge_samples_%j.log /bin/sh ./01_scripts/05_merge_samples.sh &
 
 # valeria
 # srun -c 1 -p ibis_small --time=1-00:00:00 --mem=10G -J 05_merge_samples -o log/05_merge_samples_%j.log /bin/sh ./01_scripts/05_merge_samples.sh &
@@ -60,6 +60,8 @@ less $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.tmp | grep -v 
 cat $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.contents | bcftools sort > $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.vcf
 
 # Clean up 
+rm $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.tmp
+rm $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.contents
 rm $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header.tmp
 rm $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header.contigs
 rm $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header
