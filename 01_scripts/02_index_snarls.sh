@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Build variant-aware genome graph index and compute snarls, i.e. sites of variation. This is done ONCE for all samples.
+# Correct CPU variable and srun command if required
 
 # manitou
-# srun -c 10 -p medium --time=7-00:00:00 -J 02_index_snarls --mem=200G -o log/02_index_snarls_%j.log /bin/sh ./01_scripts/02_index_snarls.sh &
+# srun -c 20 -p medium --time=7-00:00:00 -J 02_index_snarls --mem=200G -o log/02_index_snarls_%j.log /bin/sh ./01_scripts/02_index_snarls.sh &
 
 # valeria
 # srun -c 20 -p ibis_medium --time=7-00:00:00 -J 02_index_snarls --mem=200G -o log/02_index_snarls_%j.log /bin/sh ./01_scripts/02_index_snarls.sh &
@@ -42,7 +43,7 @@ fi
 
 # 1. Build the graph with genome + unpahsed vcf and index 
 echo "starting vg index"
-#vg autoindex --workflow giraffe -R XG --prefix $INDEX_DIR/index --tmp-dir $TMP_DIR --target-mem $MEM --threads $CPU --ref-fasta $GENOME --vcf $CANDIDATES_VCF
+vg autoindex --workflow giraffe -R XG --prefix $INDEX_DIR/index --tmp-dir $TMP_DIR --target-mem $MEM --threads $CPU --ref-fasta $GENOME --vcf $CANDIDATES_VCF
 echo "done building index"
 
 # 2. Compute snarls
