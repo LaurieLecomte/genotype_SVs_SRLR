@@ -154,6 +154,13 @@ cand_cols <- which(! grepl(paste(c('GT', 'REF', 'ALT'), collapse = "|"), colname
 
 cand_geno <- merge(x = cand[, cand_cols], y = geno[geno$VAR_TYPE == 'SV', c('CHROM', 'POS', 'ID', 'LEN', 'VAR_TYPE', 'TYPE')], 
                    by = c('CHROM', 'POS'), all = TRUE)
+## How many candidates not genotyped ?
+nrow(subset(cand_geno, is.na(ID.y)))
+## How many candidates genotyped ?
+nrow(subset(cand_geno, !is.na(ID.y)))
+
+nrow(subset(cand_geno, !is.na(ID.y))) / nrow(cand)
+
 
 # Merge with window around POS and SVLEN
 ## Add window around position and svlen of cand SVs
@@ -171,20 +178,23 @@ cand_geno_offset5 <-
               absLEN <= absSVLEN_max, absLEN >= absSVLEN_min), # allow window on SVLEN
        .(x.CHROM, x.POS, i.POS, # variables I need in merged output (i = cand) (x = geno)
          i.ID, x.ID, 
-         i.SVLEN, x.LEN,
+         i.SVLEN, i.SVLEN_bin, x.LEN,
          i.SVTYPE, x.TYPE, x.VAR_TYPE,
          i.platform, i.SUPP, i.SUPP_VEC)] 
 
-## How many candidates not genotypes ?
+## How many candidates not genotyped ?
 not_genotyped <- subset(cand_geno_offset5, is.na(x.ID))
 nrow(not_genotyped) ## candidates that were unmatched to a genotyped SV
+
+nrow(subset(cand_geno_offset5, !is.na(x.ID))) / nrow(cand)
 
 ## How many genotyped SVs that were NOT candidates
 ### these SVs are in in geno, but not in cand_geno_offset5
 not_candidates <- subset(geno, ID %in% setdiff(geno$ID, cand_geno_offset5$x.ID))
+# nrow(not_candidates)
 
-
-table(cand_geno_offset5$i.SVTYPE)
+cand_geno_offset5_genotyped <- subset(cand_geno_offset5, ! is.na(x.ID))
+table(cand_geno_offset5_genotyped$i.SVTYPE)
 
 
 
