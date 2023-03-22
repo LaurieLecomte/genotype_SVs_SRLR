@@ -9,7 +9,7 @@ library(dplyr)
 argv <- commandArgs(T)
 CANDIDATES <- argv[1] 
 GENOTYPED_FILT <- argv[2]
-OFFSET <- argv[3]
+OFFSET <- as.numeric(argv[3])
 
 
 # 1.1 Candidate SVs -------------------------------------------------------
@@ -352,13 +352,13 @@ ggplot(data = vg_not_assigned_biall) +
 # 5. Export useful infos --------------------------------------------------
 # Export matched calls to a list
 write.table(x = cand_geno_offset_genotyped[, c('x.CHROM', 'x.POS', 'x.ID', 'i.ID', 'i.SVTYPE', 'i.SVLEN', 'i.SUPP_VEC')],
-            file = paste0(strsplit(GENOTYPED, '.table')[[1]], 'matched_offset', OFFSET, 'bp.txt'),
+            file = paste0(strsplit(GENOTYPED_FILT, '.table')[[1]], '_matched_offset', OFFSET, 'bp.txt'),
             col.names = c('CHROM', 'POS', 'ID', 'CAND_ID', 'CAND_SVTYPE', 'CAND_SVLEN', 'CAND_SUPP_VEC'),
             quote = FALSE, row.names = FALSE, sep = "\t")
 
 # Export UNmatched calls to a list
 write.table(x = vg_not_assigned_biall[, c('CHROM', 'POS', 'ID')],
-            file = paste0(strsplit(GENOTYPED, '.table')[[1]], 'unmatched_offset', OFFSET, 'bp.txt'),
+            file = paste0(strsplit(GENOTYPED_FILT, '.table')[[1]], '_unmatched_offset', OFFSET, 'bp.txt'),
             col.names = c('CHROM', 'POS', 'ID'),
             quote = FALSE, row.names = FALSE, sep = "\t")
 

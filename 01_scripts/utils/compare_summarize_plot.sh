@@ -51,11 +51,13 @@ FILT_GENO_VCF="$FILT_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_MAF"$MIN_MAF"_FM
 
 # LOAD REQUIRED MODULES
 module load bcftools/1.13
+module load R/4.1
 
 # 1. Convert inputs to tables
 bcftools query -f '%CHROM\t%POS\t%ID\t%SVTYPE\t%SVLEN\t%END\t%SUPP\t%SUPP_VEC\n' $RAW_SR_VCF > $VCF_DIR/raw/"$(basename -s .sorted.vcf $RAW_SR_VCF)".table
 
 bcftools query -f '%CHROM\t%POS\t%ID\t%SVTYPE\t%SVLEN\t%END\t%SUPP\t%SUPP_VEC\n' $RAW_LR_VCF > $VCF_DIR/raw/"$(basename -s .sorted.vcf $RAW_LR_VCF)".table
+
 bcftools query -f '%CHROM\t%POS\t%ID\t%REF\t%ALT\t%SVTYPE\t%SVLEN\t%END\t%SUPP\t%SUPP_VEC\n' $CANDIDATES_VCF > $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".simpl.table
 
 # 2. Add missing info for some INVs 
@@ -79,11 +81,13 @@ bcftools annotate -a $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)
 bcftools query -f '%CHROM\t%POS\t%ID\t%REF\t%ALT\t%SVTYPE\t%SVLEN\t%END_corr\t%SUPP\t%SUPP_VEC\t[%GT\t]\n' -H $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)"_correxINVs.vcf.gz > $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table
 
 ## Convert input raw genotyped SVs VCF to table
-#bcftools query -f "%CHROM\t%POS\t%ID\t%REF\t%ALT\t[%GT\t]\n" -H $GENO_VCF > "$MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table"
+##bcftools query -f "%CHROM\t%POS\t%ID\t%REF\t%ALT\t[%GT\t]\n" -H $GENO_VCF > "$MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table"
 bcftools query -f "%CHROM\t%POS\t%ID\t%REF\t%ALT\t[%GT\t%DP\t%GQ\t]\n" -H $GENO_VCF > "$MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table"
 
 ## Match raw genotyped with candidates
-Rscript 01_scripts/merge_compare_candidates_raw_geno.R $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table" 5 
+#Rscript 01_scripts/utils/merge_compare_candidates_raw_geno.R $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table" 5 
+#Rscript 01_scripts/utils/merge_compare_candidates_raw_geno.R $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table 08_merged/merged_SUPP2_genotyped.table 5
+Rscript 01_scripts/utils/merge_compare_candidates_raw_geno.R $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table "$MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table" 5
 
 # 4. Infer info about FILTERED genotyped SVs from candidates 
 ## Convert input filtered genotyped SVs VCF to table
@@ -91,6 +95,6 @@ Rscript 01_scripts/merge_compare_candidates_raw_geno.R $VCF_DIR/candidates/"$(ba
 bcftools query -f "%CHROM\t%POS\t%ID\t%REF\t%ALT\t[%GT\t%DP\t%GQ]\n" -H $FILT_GENO_VCF > "$FILT_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_MAF"$MIN_MAF"_FMISS"$MAX_MISS".table"
 
 ## Match filtered genotyped with candidates
-Rscript 01_scripts/merge_compare_candidates_filt_geno.R $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table" 5 
+Rscript 01_scripts/utils/merge_compare_candidates_filt_geno.R $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table "$FILT_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_MAF"$MIN_MAF"_FMISS"$MAX_MISS".table" 5 
 
 # Clean up
