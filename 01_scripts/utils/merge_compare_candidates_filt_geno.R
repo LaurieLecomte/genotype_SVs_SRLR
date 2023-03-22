@@ -262,7 +262,7 @@ ggplot(data = cand_geno_offset_genotyped) +
     x = "SV size (bp)",
     y = "SV count",
     fill = "Data type",
-    title = "filtered genotyped SV count by size bins and platform"
+    title = "Filtered genotyped SV count matched with known candidates, by size bins and platform"
   ) + 
   scale_fill_viridis_d(option = "B")
 
@@ -345,7 +345,7 @@ ggplot(data = vg_not_assigned_biall) +
   labs(
     x = "SV size (bp)",
     y = "SV count",
-    title = "filtered UNMATCHED genotyped SV count by ALT allele size"
+    title = "Filtered UNMATCHED genotyped SV count by ALT allele size"
   ) 
 
 
