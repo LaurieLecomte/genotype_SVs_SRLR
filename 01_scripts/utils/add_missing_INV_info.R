@@ -2,6 +2,7 @@
 # when SR and LR calls were merged prior to genotyping
 
 library(data.table)
+library(ggplot2)
 
 # 1. Access files in command line, import and format ----------------------
 argv <- commandArgs(T)

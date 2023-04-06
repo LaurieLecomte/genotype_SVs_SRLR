@@ -3,6 +3,7 @@
 library(data.table)
 library(ggplot2)
 library(dplyr)
+library(scales)
 
 
 # 1. Access files in command line, import and format ----------------------
@@ -227,22 +228,48 @@ cand_geno_offset <-
          i.platform, i.SUPP, i.SUPP_VEC, x.num_alt_alleles)] 
 
 
+
+
 # 3. Explore successfully MATCHED calls -----------------------------------
-# How many assigned ?
+# How many successful matches ?
 cand_geno_offset_genotyped <- subset(cand_geno_offset, ! is.na(x.ID)) # vg ID is NOT NA if matched with a known candidate
 length(unique(cand_geno_offset_genotyped$i.ID)) # unique candidates IDs assigned to a vg call
 length(unique(cand_geno_offset_genotyped$x.ID)) # unique vg IDs assigned to a candidate SV
 
+
+
+
+matched_geno_IDs <- geno$ID[which(geno$ID %in% cand_geno_offset$x.ID)]
+paste(length(matched_geno_IDs), 'vg IDs matched to a known candidate')
+
+unmatched_geno_IDs <- geno$ID[which(! geno$ID %in% cand_geno_offset$x.ID)]
+paste(length(unmatched_geno_IDs), 'vg IDs NOT matched to a known candidate')
+
+#cand_geno_offset_matched <- cand_geno_offset[cand_geno_offset$x.ID %in% matched_geno_IDs, ] # equivalent to cand_geno_offset_genotyped
+
+## Remove vg IDs matched to more than 1 candidate
+dup_vg_IDs <- cand_geno_offset_genotyped$x.ID[which(duplicated(cand_geno_offset_genotyped$x.ID))]
+paste(length(dup_vg_IDs), 'vg IDs are duplicates and were matched to > 1 known candidate')
+
+cand_geno_offset_genotyped_no_dups <- cand_geno_offset_genotyped[! which(cand_geno_offset_genotyped$x.ID %in% dup_vg_IDs), ]
+
+## how many unmatched or duplicate (ambiguous) matches ? 
+(length(dup_vg_IDs)) + length(unmatched_geno_IDs)
+paste((length(dup_vg_IDs) + length(unmatched_geno_IDs)), 'vg IDs are duplicates OR unmatched')
+
+
 # How many assigned by candidate SVTYPE and platform?
-table(cand_geno_offset_genotyped$i.SVTYPE)
+table(cand_geno_offset_genotyped_no_dups$i.SVTYPE)
+
+
 ## Reorder candidates' platform levels
 reordered_platform <- c('SR', 'LR', 'LR + SR')
-cand_geno_offset_genotyped$i.platform_reordered <- factor(cand_geno_offset_genotyped$i.platform, 
+cand_geno_offset_genotyped_no_dups$i.platform_reordered <- factor(cand_geno_offset_genotyped_no_dups$i.platform, 
                                                           levels = reordered_platform)
-table(cand_geno_offset_genotyped$i.platform_reordered, cand_geno_offset_genotyped$i.SVTYPE)
+table(cand_geno_offset_genotyped_no_dups$i.platform_reordered, cand_geno_offset_genotyped_no_dups$i.SVTYPE)
 
 # Plot assigned filtered genotyped calls by platform and SVTYPE
-ggplot(data = cand_geno_offset_genotyped) +
+ggplot(data = cand_geno_offset_genotyped_no_dups) +
   facet_wrap(~i.SVTYPE, scales = 'free_y') +
   geom_bar(aes(x = i.SVLEN_bin, fill = i.platform_reordered)) + 
   theme(
@@ -266,6 +293,51 @@ ggplot(data = cand_geno_offset_genotyped) +
   ) + 
   scale_fill_viridis_d(option = "B")
 
+# Plot assigned filtered genotyped calls by SVTYPE
+# Get SVTYPE values
+svtypes <- sort(unique(cand_geno_offset_genotyped_no_dups$i.SVTYPE)) 
+#### we sort so that INV falls at the end of vector and 
+#### is assigned the most divergent color from DELs, 
+#### as INVs are rare and hard to distinguish bar plots
+
+# Get hex code for as many colors as svtypes for a given viridis palette
+hex_svtypes <- viridisLite::viridis(n = length(svtypes), option = 'D')
+show_col(hex_svtypes)
+
+# Assign a color to each svtype in a named vector
+cols_svtypes <- vector(mode = 'character', length = length(svtypes))
+for (i in 1:length(svtypes)) {
+  names(cols_svtypes)[i] <- svtypes[i]
+  cols_svtypes[i] <- hex_svtypes[i]
+}
+
+
+plot_matched_by_type <- 
+ggplot(data = cand_geno_offset_genotyped_no_dups) +
+  #facet_wrap(~i.SVTYPE, scales = 'free_y') +
+  geom_bar(aes(x = i.SVLEN_bin, fill = i.SVTYPE)) + 
+  theme(
+    ## Plot title
+    plot.title = element_text(size = 10, face = 'bold', hjust = 0.5),
+    ## Axis
+    axis.text.x = element_text(angle = 45, size = 6, hjust = 1),
+    axis.text.y = element_text(size = 6, hjust = 1),
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    ## Legend
+    legend.title = element_text(size = 8, hjust = 0.5),
+    legend.text = element_text(size = 7),
+    legend.key.size = unit(5, 'mm')
+  ) +
+  labs(
+    x = "SV size (bp)",
+    y = "SV count",
+    fill = "SV type",
+    title = "Filtered genotyped SV count matched with known candidates"
+  ) + 
+  scale_fill_manual(values = cols_svtypes)
+
+saveRDS(plot_matched_by_type, file = paste0(strsplit(GENOTYPED_FILT, '.table')[[1]], '_matched_offset', OFFSET, 'by_type.rds'))
 
 # 4. Explore UNMATCHED vg calls -------------------------------------------
 # Which genotyped calls were not assigned ?
@@ -351,7 +423,7 @@ ggplot(data = vg_not_assigned_biall) +
 
 # 5. Export useful infos --------------------------------------------------
 # Export matched calls to a list
-write.table(x = cand_geno_offset_genotyped[, c('x.CHROM', 'x.POS', 'x.ID', 'i.ID', 'i.SVTYPE', 'i.SVLEN', 'i.SUPP_VEC')],
+write.table(x = cand_geno_offset_genotyped_no_dups[, c('x.CHROM', 'x.POS', 'x.ID', 'i.ID', 'i.SVTYPE', 'i.SVLEN', 'i.SUPP_VEC')],
             file = paste0(strsplit(GENOTYPED_FILT, '.table')[[1]], '_matched_offset', OFFSET, 'bp.txt'),
             col.names = c('CHROM', 'POS', 'ID', 'CAND_ID', 'CAND_SVTYPE', 'CAND_SVLEN', 'CAND_SUPP_VEC'),
             quote = FALSE, row.names = FALSE, sep = "\t")
