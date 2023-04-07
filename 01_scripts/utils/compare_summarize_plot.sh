@@ -73,7 +73,7 @@ tabix -s1 -b2 -e2 $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".s
 ### For some reason, bcftools annotate does NOT carry over END from annotation file to VCF, so we bypass this issue by creating a whole new tag for the corrected END, which will differ from original END tag only for INVs (OK for SVLEN tag)
 echo '##INFO=<ID=END_corr,Number=1,Type=Integer,Description="End position of structural variation">' > $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".END.hdr
 
-bcftools annotate -a $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".simpl.table.annot.gz -c CHROM,POS,ID,SVTYPE,SVLEN,END_corr $CANDIDATES_VCF -h $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".END.hdr | bcftools sort -Oz > $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)"_correxINVs.vcf.gz 
+bcftools annotate -a $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".simpl.table.annot.gz -c CHROM,POS,-,-,INFO/SVLEN,INFO/END_corr $CANDIDATES_VCF -h $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".END.hdr | bcftools sort -Oz > $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)"_correxINVs.vcf.gz
 
 
 # 3. Infer info about RAW genotyped SVs from candidates (merged, but unfiltered calls in 08_merged)
@@ -82,12 +82,13 @@ bcftools query -f '%CHROM\t%POS\t%ID\t%REF\t%ALT\t%SVTYPE\t%SVLEN\t%END_corr\t%S
 
 ## Convert input raw genotyped SVs VCF to table
 ##bcftools query -f "%CHROM\t%POS\t%ID\t%REF\t%ALT\t[%GT\t]\n" -H $GENO_VCF > "$MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table"
-bcftools query -f "%CHROM\t%POS\t%ID\t%REF\t%ALT\t[%GT\t%DP\t%GQ\t]\n" -H $GENO_VCF > "$MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table"
+#bcftools query -f "%CHROM\t%POS\t%ID\t%REF\t%ALT\t[%GT\t%DP\t%GQ\t]\n" -H $GENO_VCF > "$MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table"
 
 ## Match raw genotyped with candidates
 #Rscript 01_scripts/utils/merge_compare_candidates_raw_geno.R $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table" 5 
 #Rscript 01_scripts/utils/merge_compare_candidates_raw_geno.R $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table 08_merged/merged_SUPP2_genotyped.table 5
-Rscript 01_scripts/utils/merge_compare_candidates_raw_geno.R $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table "$MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table" 5
+
+#Rscript 01_scripts/utils/merge_compare_candidates_raw_geno.R $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table "$MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table" 5
 
 # 4. Infer info about FILTERED genotyped SVs from candidates 
 ## Convert input filtered genotyped SVs VCF to table
