@@ -12,6 +12,8 @@ filt_stats <- fread(FILT_STATS, col.names = c('CHROM', 'POS', 'DP', 'F_MISSING')
 
 # 2. Compute basic stats --------------------------------------------------
 variants_stats <- function(x){
+  # Total 
+  print(paste('number of variants :', length(x)))
   # Compute mean
   print(paste('mean :', mean(x)))
   # Compute min and max
