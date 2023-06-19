@@ -24,7 +24,7 @@ SNARLS_DIR="$GRAPH_DIR/snarls"
 PACKS_DIR="$GRAPH_DIR/packs"
 
 CALLS_DIR="07_calls"
-MERGED_DIR="08_MERGED"
+MERGED_DIR="08_merged"
 FILT_DIR="09_filtered"
 
 CPU=1
