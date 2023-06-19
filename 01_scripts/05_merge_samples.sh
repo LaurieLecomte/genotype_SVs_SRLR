@@ -48,7 +48,7 @@ ls -1 $CALLS_DIR/filtered/*_DP"$MIN_DP"_GQ"$MIN_GQ".vcf.gz > 02_infos/samples_VC
 bcftools merge -l 02_infos/samples_VCF.txt | bcftools sort > $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.tmp
 
 # 3. Correct contig order in header
-bcftools view -h $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.tmp | grep -v ^'#CHROM' | grep -v contig > $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header.tmp
+bcftools view -h $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.tmp | grep -v ^'#CHROM' | grep -v 'contig' | grep -v 'SAMPLE' > $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header.tmp
 
 bcftools view -h $CANDIDATES_VCF | grep -v ^'#CHROM' | grep contig > $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header.contigs
 
@@ -58,6 +58,10 @@ less $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.tmp | grep -v 
 
 ## Cat new header and contents
 cat $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.header $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.contents | bcftools sort > $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.vcf
+
+# 4. Compress and index
+bgzip $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.vcf -f
+tabix -p vcf $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.vcf.gz -f
 
 # Clean up 
 rm $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.tmp
