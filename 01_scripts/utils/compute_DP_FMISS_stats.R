@@ -50,6 +50,14 @@ sapply(X = raw_stats$F_MISS_bins,
 
 
 # Plot
+## add type in case we need it for combined plotting
+raw_stats$TYPE <- 'SVs'
+write.table(raw_stats,
+            col.names = c('CHROM', 'POS', 'DP', 'F_MISSING',
+                          'F_MISS_bins', 'F_MISS_groups', 'TYPE'),
+            file = '/mnt/ibis/lbernatchez/users/lalec31/RDC_Romaine/03_SR_LR/genotype_SVs_SRLR/09_filtered/merged_SUPP2_MAF0.05_FMISS0.5_DP_FMISS_FMISS_stats.table',
+            sep = '\t', quote = FALSE, row.names = FALSE)
+
 SVs_F_MISS_plot <- 
 ggplot(data = raw_stats) +
   geom_bar(aes(F_MISS_bins, fill = F_MISS_groups)) + 
@@ -57,7 +65,7 @@ ggplot(data = raw_stats) +
     axis.text.x = element_text(angle = 45, size = 8, hjust = 1)
   ) + scale_fill_manual(values = c('red', 'grey60')) +
   labs(x = 'Proportion of missing genotypes',
-       y = 'SV count',
+       y = 'Count',
        fill = 'F_MISSING filter')
 
 saveRDS(SVs_F_MISS_plot,
