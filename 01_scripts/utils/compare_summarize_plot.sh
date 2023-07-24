@@ -54,48 +54,33 @@ module load bcftools/1.13
 module load R/4.1
 
 # 1. Convert inputs to tables
-bcftools query -f '%CHROM\t%POS\t%ID\t%SVTYPE\t%SVLEN\t%END\t%SUPP\t%SUPP_VEC\n' $RAW_SR_VCF > $VCF_DIR/raw/"$(basename -s .sorted.vcf $RAW_SR_VCF)".table
+#bcftools query -f '%CHROM\t%POS\t%ID\t%SVTYPE\t%SVLEN\t%END\t%SUPP\t%SUPP_VEC\n' $RAW_SR_VCF > $VCF_DIR/raw/"$(basename -s .sorted.vcf $RAW_SR_VCF)".table
 
-bcftools query -f '%CHROM\t%POS\t%ID\t%SVTYPE\t%SVLEN\t%END\t%SUPP\t%SUPP_VEC\n' $RAW_LR_VCF > $VCF_DIR/raw/"$(basename -s .sorted.vcf $RAW_LR_VCF)".table
+#bcftools query -f '%CHROM\t%POS\t%ID\t%SVTYPE\t%SVLEN\t%END\t%SUPP\t%SUPP_VEC\n' $RAW_LR_VCF > $VCF_DIR/raw/"$(basename -s .sorted.vcf $RAW_LR_VCF)".table
 
-bcftools query -f '%CHROM\t%POS\t%ID\t%REF\t%ALT\t%SVTYPE\t%SVLEN\t%END\t%SUPP\t%SUPP_VEC\n' $CANDIDATES_VCF > $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".simpl.table
+#bcftools query -f '%CHROM\t%POS\t%ID\t%REF\t%ALT\t%SVTYPE\t%SVLEN\t%END\t%SUPP\t%SUPP_VEC\n' $CANDIDATES_VCF > $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".simpl.table
 
 # 2. Add missing info for some INVs 
 ## Extract missing INV info from unmerged VCFs
-Rscript 01_scripts/utils/add_missing_INV_info.R $VCF_DIR/raw/"$(basename -s .sorted.vcf $RAW_SR_VCF)".table $VCF_DIR/raw/"$(basename -s .sorted.vcf $RAW_LR_VCF)".table $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".simpl.table
+#Rscript 01_scripts/utils/add_missing_INV_info.R $VCF_DIR/raw/"$(basename -s .sorted.vcf $RAW_SR_VCF)".table $VCF_DIR/raw/"$(basename -s .sorted.vcf $RAW_LR_VCF)".table $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".simpl.table
 ## 
 
 ## Add missing info to candidates VCF
-bgzip $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".simpl.table.annot -f
-tabix -s1 -b2 -e2 $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".simpl.table.annot.gz -f
+#bgzip $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".simpl.table.annot -f
+#tabix -s1 -b2 -e2 $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".simpl.table.annot.gz -f
 ## Important to set -e at 2 (same as POS, -s2), otherwise bcftools annotate will not be able to assign the right info to the right entry 
 
 ### For some reason, bcftools annotate does NOT carry over END from annotation file to VCF, so we bypass this issue by creating a whole new tag for the corrected END, which will differ from original END tag only for INVs (OK for SVLEN tag)
-echo '##INFO=<ID=END_corr,Number=1,Type=Integer,Description="End position of structural variation">' > $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".END.hdr
+#echo '##INFO=<ID=END_corr,Number=1,Type=Integer,Description="End position of structural variation">' > $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".END.hdr
 
-bcftools annotate -a $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".simpl.table.annot.gz -c CHROM,POS,-,-,INFO/SVLEN,INFO/END_corr $CANDIDATES_VCF -h $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".END.hdr | bcftools sort -Oz > $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)"_correxINVs.vcf.gz
+#bcftools annotate -a $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".simpl.table.annot.gz -c CHROM,POS,-,-,INFO/SVLEN,INFO/END_corr $CANDIDATES_VCF -h $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".END.hdr | bcftools sort -Oz > $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)"_correxINVs.vcf.gz
 
-
-# 3. Infer info about RAW genotyped SVs from candidates (merged, but unfiltered calls in 08_merged)
+# 3. Infer info about FILTERED genotyped SVs from candidates
 ## Convert input candidates VCF to table
-bcftools query -f '%CHROM\t%POS\t%ID\t%REF\t%ALT\t%SVTYPE\t%SVLEN\t%END_corr\t%SUPP\t%SUPP_VEC\t[%GT\t]\n' -H $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)"_correxINVs.vcf.gz > $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table
+#bcftools query -f '%CHROM\t%POS\t%ID\t%REF\t%ALT\t%SVTYPE\t%SVLEN\t%END_corr\t%SUPP\t%SUPP_VEC\t[%GT\t]\n' -H $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)"_correxINVs.vcf.gz > $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table
 
-## Convert input raw genotyped SVs VCF to table
-##bcftools query -f "%CHROM\t%POS\t%ID\t%REF\t%ALT\t[%GT\t]\n" -H $GENO_VCF > "$MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table"
-#bcftools query -f "%CHROM\t%POS\t%ID\t%REF\t%ALT\t[%GT\t%DP\t%GQ\t]\n" -H $GENO_VCF > "$MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table"
+## Convert genotyped and filtered SVs VCF to table
+#bcftools query -f "%CHROM\t%POS\t%ID\t%REF\t%ALT\t[%GT\t%DP\t%GQ]\n" -H $FILT_GENO_VCF > "$FILT_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_MAF"$MIN_MAF"_FMISS"$MAX_MISS".table"
 
-## Match raw genotyped with candidates
-#Rscript 01_scripts/utils/merge_compare_candidates_raw_geno.R $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table $MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table" 5 
-#Rscript 01_scripts/utils/merge_compare_candidates_raw_geno.R $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table 08_merged/merged_SUPP2_genotyped.table 5
-
-#Rscript 01_scripts/utils/merge_compare_candidates_raw_geno.R $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table "$MERGED_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_genotyped.table" 5
-
-# 4. Infer info about FILTERED genotyped SVs from candidates 
-## Convert input filtered genotyped SVs VCF to table
-#bcftools query -f "%CHROM\t%POS\t%ID\t%REF\t%ALT\t[%GT\t]\n" -H $FILT_GENO_VCF > "$FILT_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_MAF"$MIN_MAF"_FMISS"$MAX_MISS".table"
-bcftools query -f "%CHROM\t%POS\t%ID\t%REF\t%ALT\t[%GT\t%DP\t%GQ]\n" -H $FILT_GENO_VCF > "$FILT_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_MAF"$MIN_MAF"_FMISS"$MAX_MISS".table"
-
-## Match filtered genotyped with candidates
-Rscript 01_scripts/utils/merge_compare_candidates_filt_geno.R $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table "$FILT_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_MAF"$MIN_MAF"_FMISS"$MAX_MISS".table" 5 
-
-# Clean up
+## Match filtered genotyped with candidates 
+Rscript 01_scripts/utils/infer_info_genotyped.R $VCF_DIR/candidates/"$(basename -s .vcf.gz $CANDIDATES_VCF)".table "$FILT_DIR/"$(basename -s .ready.vcf $INPUT_VCF)"_MAF"$MIN_MAF"_FMISS"$MAX_MISS".table" 5
