@@ -31,3 +31,12 @@ This pipeline was built for combined use with 3 other custom pipelines, whose ou
 
 * `vg toolkit` : version `1.46.0` was used for builing this pipeline. `vg` and dependencies can be installed via conda.
 * `bcftools` : version >= `1.13`  
+
+
+## Other scripts
+
+* `01_scripts/utils/compare_summarize_plot.sh` : Match genotyped SVs with candidates SVs in order to infer a SV type and size for genotyped SVs is possible. These informations are lost during the genotyping procedure, so we retrieve them by identifying the most likely corresponding candidate SV for a given genotyped SV. Running this script requires the following files, which can be soft-linked in the `05_candidates/raw` directory of the current pipeline : 
+
+   * SR SV VCF file : the VCF obtained after the aross-caller merge step from the [SVs_short_reads pipeline](https://github.com/LaurieLecomte/SVs_short_reads), in the 08_merged_union directory 
+   * LR SV VCF file : the VCF obtained after the aross-caller merge step from the [SVs_long_reads pipeline](https://github.com/LaurieLecomte/SVs_long_reads), in the 08_merged_union directory 
+
