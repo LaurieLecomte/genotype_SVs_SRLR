@@ -1,5 +1,13 @@
 # Population-scale genotyping of SVs called from short AND/OR long reads using short reads
 
+Genotype SVs called from short and/or long reads.
+
+This pipeline was built for using with 3 custom pipelines, whose outputs are required for genotyping (the first 2 pipelines are independant and can be executed in any order): 
+
+1. [SVs_short_reads pipeline](https://github.com/LaurieLecomte/SVs_short_reads)
+2. [SVs_long_reads pipeline](https://github.com/LaurieLecomte/SVs_long_reads)
+3. [merge_SVs_SRLR pipeline](https://github.com/LaurieLecomte/merge_SVs_SRLR)
+
 ## Pipeline overview
 
 1. `01_prepare_VCF.sh` : Filter input VCF to remove SVs that lack the proper info for genotyping (e.g., explicit ALT sequence) and format the VCF correctly.
