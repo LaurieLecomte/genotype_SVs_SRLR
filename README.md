@@ -2,7 +2,7 @@
 
 Genotype SVs called from short and/or long reads.
 
-This pipeline was built for using with 3 custom pipelines, whose outputs are required for genotyping (the first 2 pipelines are independant and can be executed in any order): 
+This pipeline was built for combined use with 3 other custom pipelines, whose outputs are required for genotyping (the first 2 pipelines are independant and can be executed in any order): 
 
 1. [SVs_short_reads pipeline](https://github.com/LaurieLecomte/SVs_short_reads)
 2. [SVs_long_reads pipeline](https://github.com/LaurieLecomte/SVs_long_reads)
