@@ -45,7 +45,7 @@ MIN_DP=4
 MAX_DP=80 # arbitrary threshold of 5 * anticipated SR sequencing coverage, 5 * 16 
 
 # LOAD REQUIRED MODULES
-module load bcftools/1.15
+module load bcftools/1.13
 
 # 1. Rename sample in output VCF, since vg call -s $ID does not output sample name in output VCF, and remove unwanted contigs from header
 echo -e "SAMPLE\t$SAMPLE" > 02_infos/"$SAMPLE".names
