@@ -32,6 +32,13 @@ This pipeline was built for combined use with 3 other custom pipelines, whose ou
 * `vg toolkit` : version `1.46.0` was used for builing this pipeline. `vg` and dependencies can be installed via conda.
 * `bcftools` : version >= `1.13`  
 
+##### For all users (Manitou and other computing clusters and servers)
+A custom conda environment is highly recommended for running `vg`. 
+
+From the main directory, run `conda create --name vg_1.46.0 --file vg_1.46.0_env.txt`
+
+This environment contains both `vg 1.46.0` and `bcftools 1.13`.
+
 
 ## Other scripts
 

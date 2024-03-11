@@ -3,3 +3,4 @@
 # platform: linux-64
 @EXPLICIT
 https://conda.anaconda.org/bioconda/linux-64/vg-1.46.0-h9ee0642_0.tar.bz2
+https://conda.anaconda.org/bioconda/linux-64/bcftools-1.13-h3a49de5_0.tar.bz2
