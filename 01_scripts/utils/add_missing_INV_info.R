@@ -4,6 +4,9 @@
 library(data.table)
 library(ggplot2)
 
+# Disable scientific notation to prevent issues with format
+options(scipen=999)
+
 # 1. Access files in command line, import and format ----------------------
 argv <- commandArgs(T)
 SR <- argv[1]
