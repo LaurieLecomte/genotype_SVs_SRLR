@@ -1,5 +1,8 @@
 # Population-scale genotyping of SVs called from short AND/OR long reads using short reads
 
+**As of mid-2024, this pipeline is undergoing major changes to follow [recommendations for genotyping SVs vith *vg*](https://github.com/vgteam/vg/wiki/SV-Genotyping-and-variant-calling#genotyping-a-vcf-using-the-graph)**
+
+
 Genotype SVs called from short and/or long reads.
 
 This pipeline was built for combined use with 3 other custom pipelines, whose outputs are required for genotyping (the first 2 pipelines are independant and can be executed in any order): 
